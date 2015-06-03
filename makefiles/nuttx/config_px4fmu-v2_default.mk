@@ -135,6 +135,8 @@ MODULES		+= examples/flow_position_estimator
 #
 MODULES		+= examples/rover_steering_control
 
+MODULES		+= modules/px4_simple_app
+
 #
 # Demo apps
 #
