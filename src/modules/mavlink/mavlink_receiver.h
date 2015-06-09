@@ -74,6 +74,7 @@
 #include <uORB/topics/vehicle_force_setpoint.h>
 #include <uORB/topics/time_offset.h>
 #include <uORB/topics/distance_sensor.h>
+#include <uORB/topics/rc_channels_override.h>
 
 #include "mavlink_ftp.h"
 
@@ -136,7 +137,7 @@ private:
 	void handle_message_hil_gps(mavlink_message_t *msg);
 	void handle_message_hil_state_quaternion(mavlink_message_t *msg);
 	void handle_message_distance_sensor(mavlink_message_t *msg);
-
+	void handle_message_rc_channel_override(mavlink_message_t *msg);
 	void *receive_thread(void *arg);
 
 	/**
@@ -181,6 +182,7 @@ private:
 	orb_advert_t _manual_pub;
 	orb_advert_t _land_detector_pub;
 	orb_advert_t _time_offset_pub;
+	orb_advert_t _rc_channels_override_pub;
 	int _control_mode_sub;
 	int _hil_frames;
 	uint64_t _old_timestamp;

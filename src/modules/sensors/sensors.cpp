@@ -94,6 +94,7 @@
 #include <uORB/topics/differential_pressure.h>
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/rc_parameter_map.h>
+#include <uORB/topics/rc_channels_override.h>
 
 /**
  * Analog layout:
@@ -233,6 +234,8 @@ private:
 	int 		_params_sub;			/**< notification of parameter updates */
 	int		_rc_parameter_map_sub;			/**< rc parameter map subscription */
 	int 		_manual_control_sub;			/**< notification of manual control updates */
+	int		_rc_channels_override_sub;			/**< rc channels ovveride from MAVLINK */
+
 
 	orb_advert_t	_sensor_pub;			/**< combined sensor data topic */
 	orb_advert_t	_manual_control_pub;		/**< manual control signal topic */
@@ -245,12 +248,14 @@ private:
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
 
 	struct rc_channels_s _rc;			/**< r/c channel data */
+	struct rc_channels_override_s _rc_overide; 	/**< currrent ovveride request from MAVLINK */
 	struct battery_status_s _battery_status;	/**< battery status */
 	struct baro_report _barometer;			/**< barometer data */
 	struct differential_pressure_s _diff_pres;
 	struct airspeed_s _airspeed;
 	struct rc_parameter_map_s _rc_parameter_map;
 	float _param_rc_values[RC_PARAM_MAP_NCHAN];	/**< parameter values for RC control */
+
 
 	math::Matrix<3, 3>	_board_rotation;	/**< rotation matrix for the orientation that the board is mounted */
 	math::Matrix<3, 3>	_mag_rotation[3];		/**< rotation matrix for the orientation that the external mag0 is mounted */
@@ -515,6 +520,7 @@ Sensors::Sensors() :
 	_params_sub(-1),
 	_rc_parameter_map_sub(-1),
 	_manual_control_sub(-1),
+	_rc_channels_override_sub(-1),
 
 	/* publications */
 	_sensor_pub(nullptr),
@@ -536,6 +542,7 @@ Sensors::Sensors() :
 	_battery_current_timestamp(0)
 {
 	memset(&_rc, 0, sizeof(_rc));
+	memset(&_rc_overide, 0,sizeof(_rc_overide));
 	memset(&_diff_pres, 0, sizeof(_diff_pres));
 	memset(&_rc_parameter_map, 0, sizeof(_rc_parameter_map));
 
@@ -1885,6 +1892,12 @@ Sensors::rc_poll()
 	bool rc_updated;
 	orb_check(_rc_sub, &rc_updated);
 
+	bool rc_override_updated;
+	orb_check(_rc_channels_override_sub, &rc_override_updated);
+	if (rc_override_updated)
+	{
+		orb_copy(ORB_ID(rc_channels_override), _rc_channels_override_sub, &_rc_overide);
+	}
 	if (rc_updated) {
 		/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 		struct rc_input_values rc_input;
@@ -1994,6 +2007,11 @@ Sensors::rc_poll()
 			struct manual_control_setpoint_s manual;
 			memset(&manual, 0 , sizeof(manual));
 
+			bool overide_ok = false;
+			if (hrt_absolute_time()-_rc_overide.timestamp <1e6)
+			{
+				overide_ok = true;
+			}
 			/* fill values in manual_control_setpoint topic only if signal is valid */
 			manual.timestamp = rc_input.timestamp_last_signal;
 
@@ -2009,6 +2027,26 @@ Sensors::rc_poll()
 			manual.aux4 = get_rc_value (rc_channels_s::RC_CHANNELS_FUNCTION_AUX_4, -1.0, 1.0);
 			manual.aux5 = get_rc_value (rc_channels_s::RC_CHANNELS_FUNCTION_AUX_5, -1.0, 1.0);
 
+			if (overide_ok)
+			{
+                if (_rc_overide.chan2_raw >= 1000 && _rc_overide.chan2_raw<= 2000)
+				{
+					manual.x = float(_rc_overide.chan2_raw-1500)/500.0f;
+				}
+                if (_rc_overide.chan3_raw >= 1000 && _rc_overide.chan3_raw<= 2000)
+				{
+                    manual.y = float(_rc_overide.chan3_raw-1500)/500.0f;
+				}
+                if (_rc_overide.chan4_raw >= 1000 && _rc_overide.chan4_raw<= 2000)
+				{
+					manual.r = float(_rc_overide.chan4_raw-1500)/500.0f;
+				}
+                if (_rc_overide.chan1_raw >= 1000 && _rc_overide.chan1_raw<= 2000)
+                {
+                    manual.z = float(_rc_overide.chan1_raw-1500)/500.0f;
+                }
+
+			}
 			/* mode switches */
 			manual.mode_switch = get_rc_sw3pos_position (rc_channels_s::RC_CHANNELS_FUNCTION_MODE, _parameters.rc_auto_th, _parameters.rc_auto_inv, _parameters.rc_assist_th, _parameters.rc_assist_inv);
 			manual.posctl_switch = get_rc_sw2pos_position (rc_channels_s::RC_CHANNELS_FUNCTION_POSCTL, _parameters.rc_posctl_th, _parameters.rc_posctl_inv);
@@ -2115,6 +2153,7 @@ Sensors::task_main()
 	_params_sub = orb_subscribe(ORB_ID(parameter_update));
 	_rc_parameter_map_sub = orb_subscribe(ORB_ID(rc_parameter_map));
 	_manual_control_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
+	_rc_channels_override_sub = orb_subscribe(ORB_ID(rc_channels_override));
 
 	/* rate limit vehicle status updates to 5Hz */
 	orb_set_interval(_vcontrol_mode_sub, 200);

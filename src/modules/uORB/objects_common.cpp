@@ -256,3 +256,6 @@ ORB_DEFINE(mc_att_ctrl_status, struct mc_att_ctrl_status_s);
 
 #include "topics/distance_sensor.h"
 ORB_DEFINE(distance_sensor, struct distance_sensor_s);
+
+#include "topics/rc_channels_override.h"
+ORB_DEFINE(rc_channels_override, struct rc_channels_override_s);
