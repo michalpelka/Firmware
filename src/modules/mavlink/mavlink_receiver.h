@@ -134,7 +134,7 @@ private:
 	void handle_message_timesync(mavlink_message_t *msg);
 	void handle_message_hil_sensor(mavlink_message_t *msg);
 	void handle_message_hil_gps(mavlink_message_t *msg);
-	void handle_message_hil_state_quaternion(mavlink_message_t *msg)
+	void handle_message_hil_state_quaternion(mavlink_message_t *msg);
 	void handle_message_rc_channel_override(mavlink_message_t *msg);
 
 	void *receive_thread(void *arg);

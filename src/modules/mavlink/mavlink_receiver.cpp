@@ -212,7 +212,7 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		handle_message_timesync(msg);
 		break;
 
-	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:1
+	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:
 		handle_message_rc_channel_override(msg);
 	default:
 		break;
