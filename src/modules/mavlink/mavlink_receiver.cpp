@@ -123,6 +123,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_manual_pub(-1),
 	_land_detector_pub(-1),
 	_time_offset_pub(-1),
+	_rc_channels_override_pub(-1),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
 	_old_timestamp(0),
@@ -134,6 +135,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_rates_sp{},
 	_time_offset_avg_alpha(0.6),
 	_time_offset(0)
+
 {
 
 }
@@ -210,6 +212,8 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		handle_message_timesync(msg);
 		break;
 
+	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:1
+		handle_message_rc_channel_override(msg);
 	default:
 		break;
 	}
@@ -1610,6 +1614,35 @@ MavlinkReceiver::receive_thread(void *arg)
 
 	return NULL;
 }
+
+void MavlinkReceiver::handle_message_rc_channel_override(mavlink_message_t *msg)
+{
+	mavlink_rc_channels_override_t rc_override;
+	mavlink_msg_rc_channels_override_decode(msg, &rc_override);
+	uint64_t timestamp = hrt_absolute_time();
+
+	struct rc_channels_override_s rc_override_;
+	memset(&rc_override_, 0, sizeof(rc_override_));
+	rc_override_.chan1_raw = rc_override.chan1_raw;
+	rc_override_.chan2_raw = rc_override.chan2_raw;
+	rc_override_.chan3_raw = rc_override.chan3_raw;
+	rc_override_.chan4_raw = rc_override.chan4_raw;
+	rc_override_.chan5_raw = rc_override.chan5_raw;
+	rc_override_.chan6_raw = rc_override.chan6_raw;
+	rc_override_.chan7_raw = rc_override.chan7_raw;
+	rc_override_.chan8_raw = rc_override.chan8_raw;
+	rc_override_.timestamp = timestamp;
+	if (_rc_channels_override_pub < 0)
+	{
+		_rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override_);
+	}
+	else
+	{
+		orb_publish(ORB_ID(rc_channels_override), _rc_channels_override_pub, &rc_override_);
+	}
+}
+
+
 
 void MavlinkReceiver::print_status()
 {
