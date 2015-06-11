@@ -1393,7 +1393,6 @@ MavlinkReceiver::handle_message_rc_channel_override(mavlink_message_t *msg)
 {
 	mavlink_rc_channels_override_t rc_override;
 	mavlink_msg_rc_channels_override_decode(msg, &rc_override);
-	uint64_t timestamp = hrt_absolute_time();
 
 	struct rc_channels_override_s rc_override_;
 	memset(&rc_override_, 0, sizeof(rc_override_));
@@ -1405,7 +1404,7 @@ MavlinkReceiver::handle_message_rc_channel_override(mavlink_message_t *msg)
 	rc_override_.chan6_raw = rc_override.chan6_raw;
 	rc_override_.chan7_raw = rc_override.chan7_raw;
 	rc_override_.chan8_raw = rc_override.chan8_raw;
-	rc_override_.timestamp = timestamp;
+	rc_override_.timestamp = hrt_absolute_time();
 	if (_rc_channels_override_pub == nullptr)
 	{
 		_rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override_);

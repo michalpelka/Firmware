@@ -2008,7 +2008,7 @@ Sensors::rc_poll()
 			memset(&manual, 0 , sizeof(manual));
 
 			bool overide_ok = false;
-			if (hrt_absolute_time()-_rc_overide.timestamp <1e6)
+			if (hrt_elapsed_time(&_rc_overide.timestamp) < 2000 * 1000)
 			{
 				overide_ok = true;
 			}
