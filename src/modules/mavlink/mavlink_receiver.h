@@ -75,7 +75,6 @@
 #include <uORB/topics/time_offset.h>
 #include <uORB/topics/distance_sensor.h>
 #include <uORB/topics/rc_channels_override.h>
-#include "v1.0/assistance_messages/mavlink_msg_rc_offboard.h"
 #include "mavlink_ftp.h"
 
 #define PX4_EPOCH_SECS 1234567890ULL

@@ -2036,7 +2036,7 @@ Sensors::rc_poll()
                                 manual.x = _rc_overide.pitch;
                             }
                             else
-                            if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.x > -0.2f && manual.x < -0.2f)
+                            if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.x > -0.2f && manual.x < 0.2f)
                             {
                                 manual.x = _rc_overide.pitch;
                             }    
@@ -2052,7 +2052,7 @@ Sensors::rc_poll()
                                 manual.y = _rc_overide.roll;
                             }
                             else
-                            if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.y > -0.2f && manual.y < -0.2f)
+                            if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.y > -0.2f && manual.y < 0.2f)
                             {
                                 manual.y = _rc_overide.roll;
                             }    

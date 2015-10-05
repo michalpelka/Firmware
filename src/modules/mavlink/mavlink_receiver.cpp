@@ -217,11 +217,14 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 	case MAVLINK_MSG_ID_DISTANCE_SENSOR:
 		handle_message_distance_sensor(msg);
 		break;
+                
 	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:
 		handle_message_rc_channel_override(msg);
+                break;
+                
         case MAVLINK_MSG_ID_RC_OFFBOARD:
-		handle_message_rc_channel_override(msg);
-                        
+		handle_message_rc_offboard(msg);
+                break;        
 	default:
 		break;
 	}
@@ -1395,25 +1398,28 @@ void
 MavlinkReceiver::handle_message_rc_channel_override(mavlink_message_t *msg)
 {
     
-        mavlink_rc_offboard_t rc_offboard;
-        mavlink_msg_rc_offboard_decode(msg, &rc_offboard);
+        mavlink_rc_channels_override_t rc_ovr;
+        mavlink_msg_rc_channels_override_decode(msg, &rc_ovr);
 
         struct rc_channels_override_s rc_override;
-        memset(&rc_offboard, 0, sizeof(rc_offboard));
-        rc_override.throttle = rc_offboard.throttle;
-        rc_override.pitch = rc_offboard.pitch;
-        rc_override.roll = rc_offboard.roll;
-        rc_override.yaw = rc_offboard.yaw;
+        memset(&rc_override, 0, sizeof(rc_override));
+        
+        rc_override.throttle = (1.0f*rc_ovr.chan1_raw - 1500.0f)/500.0f;
+        rc_override.pitch =    (1.0f*rc_ovr.chan2_raw - 1500.0f)/500.0f;
+        rc_override.roll =     (1.0f*rc_ovr.chan3_raw - 1500.0f)/500.0f;
+        rc_override.yaw =      (1.0f*rc_ovr.chan4_raw - 1500.0f)/500.0f;
+        
+        rc_override.throttle_mode = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.roll_mode     = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.pitch_mode    = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.yaw_mode      = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
         
         if (rc_override.throttle < -1.0f || rc_override.throttle > 1.0f) rc_override.throttle_mode  = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
         if (rc_override.pitch    < -1.0f || rc_override.pitch    > 1.0f) rc_override.pitch_mode     = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
         if (rc_override.roll     < -1.0f || rc_override.roll     > 1.0f) rc_override.roll_mode      = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
         if (rc_override.yaw      < -1.0f || rc_override.yaw      > 1.0f) rc_override.yaw_mode       = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
 
-        rc_override.throttle_mode = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
-        rc_override.roll_mode     = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
-        rc_override.pitch_mode    = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
-        rc_override.yaw_mode      = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        
         
         rc_override.timestamp = hrt_absolute_time();
         if (_rc_channels_override_pub == nullptr)
@@ -1454,21 +1460,24 @@ MavlinkReceiver::handle_message_rc_offboard(mavlink_message_t *msg)
     mavlink_msg_rc_offboard_decode(msg, &rc_offboard);
     
     struct rc_channels_override_s rc_override;
-    memset(&rc_offboard, 0, sizeof(rc_offboard));
+    memset(&rc_override, 0, sizeof(rc_override));
     rc_override.throttle = rc_offboard.throttle;
     rc_override.pitch = rc_offboard.pitch;
     rc_override.roll = rc_offboard.roll;
     rc_override.yaw = rc_offboard.yaw;
+    
+    
+    rc_override.throttle_mode = rc_offboard.throttle_mode;
+    rc_override.roll_mode = rc_offboard.roll_mode;
+    rc_override.pitch_mode = rc_offboard.pitch_mode;
+    rc_override.yaw_mode = rc_offboard.yaw_mode;
     
     if (rc_override.throttle < -1.0f || rc_override.throttle > 1.0f) rc_override.throttle_mode  = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
     if (rc_override.pitch    < -1.0f || rc_override.pitch    > 1.0f) rc_override.pitch_mode     = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
     if (rc_override.roll     < -1.0f || rc_override.roll     > 1.0f) rc_override.roll_mode      = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
     if (rc_override.yaw      < -1.0f || rc_override.yaw      > 1.0f) rc_override.yaw_mode       = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
 
-    rc_override.throttle_mode = rc_offboard.throttle_mode;
-    rc_override.roll_mode = rc_offboard.roll_mode;
-    rc_override.pitch_mode = rc_offboard.pitch_mode;
-    rc_override.yaw_mode = rc_offboard.yaw_mode;
+    
     rc_override.timestamp = hrt_absolute_time();
     if (_rc_channels_override_pub == nullptr)
     {
