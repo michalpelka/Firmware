@@ -75,7 +75,7 @@
 #include <uORB/topics/time_offset.h>
 #include <uORB/topics/distance_sensor.h>
 #include <uORB/topics/rc_channels_override.h>
-
+#include "v1.0/assistance_messages/mavlink_msg_rc_offboard.h"
 #include "mavlink_ftp.h"
 
 #define PX4_EPOCH_SECS 1234567890ULL
@@ -138,6 +138,10 @@ private:
 	void handle_message_hil_state_quaternion(mavlink_message_t *msg);
 	void handle_message_distance_sensor(mavlink_message_t *msg);
 	void handle_message_rc_channel_override(mavlink_message_t *msg);
+        void handle_message_rc_offboard(mavlink_message_t *msg);
+        
+        
+        
 	void *receive_thread(void *arg);
 
 	/**

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<mavlink>
+        <include>common.xml</include>
+        <!-- NOTE: If the included file already contains a version tag, remove the version tag here, else uncomment to enable. -->
+	<!--<version>3</version>-->
+	<enums>
+	</enums>
+	<messages>        
+        <message id="171" name="RC_OFFBOARD">
+               <description></description>
+               <field type="uint8_t" name="target_system">System ID</field>
+               <field type="uint8_t" name="target_component">Component ID</field>
+               <field type="float"   name="throttle"></field>
+               <field type="float"   name="pitch"></field>
+               <field type="float"   name="roll"></field>
+               <field type="float"   name="yaw"></field>                  
+               <field type="uint8_t" name="throttle_mode">0-ignore, 1-override with MAVLINK priority, 2-override with RC priority, 3- add to RC</field> 
+               <field type="uint8_t" name="pitch_mode">0-ignore, 1-override with MAVLINK priority, 2-override with RC priority, 3- add to RC</field> 
+               <field type="uint8_t" name="roll_mode">0-ignore, 1-override with MAVLINK priority, 2-override with RC priority, 3- add to RC</field> 
+               <field type="uint8_t" name="yaw_mode">0-ignore, 1-override with MAVLINK priority, 2-override with RC priority, 3- add to RC</field> 
+          </message>          
+            
+	</messages>
+	
+</mavlink>

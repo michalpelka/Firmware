@@ -219,6 +219,9 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		break;
 	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:
 		handle_message_rc_channel_override(msg);
+        case MAVLINK_MSG_ID_RC_OFFBOARD:
+		handle_message_rc_channel_override(msg);
+                        
 	default:
 		break;
 	}
@@ -1391,30 +1394,93 @@ MavlinkReceiver::handle_message_hil_sensor(mavlink_message_t *msg)
 void
 MavlinkReceiver::handle_message_rc_channel_override(mavlink_message_t *msg)
 {
-	mavlink_rc_channels_override_t rc_override;
-	mavlink_msg_rc_channels_override_decode(msg, &rc_override);
+    
+        mavlink_rc_offboard_t rc_offboard;
+        mavlink_msg_rc_offboard_decode(msg, &rc_offboard);
 
-	struct rc_channels_override_s rc_override_;
-	memset(&rc_override_, 0, sizeof(rc_override_));
-	rc_override_.chan1_raw = rc_override.chan1_raw;
-	rc_override_.chan2_raw = rc_override.chan2_raw;
-	rc_override_.chan3_raw = rc_override.chan3_raw;
-	rc_override_.chan4_raw = rc_override.chan4_raw;
-	rc_override_.chan5_raw = rc_override.chan5_raw;
-	rc_override_.chan6_raw = rc_override.chan6_raw;
-	rc_override_.chan7_raw = rc_override.chan7_raw;
-	rc_override_.chan8_raw = rc_override.chan8_raw;
-	rc_override_.timestamp = hrt_absolute_time();
-	if (_rc_channels_override_pub == nullptr)
-	{
-		_rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override_);
-	}
-	else
-	{
-		orb_publish(ORB_ID(rc_channels_override), _rc_channels_override_pub, &rc_override_);
-	}
+        struct rc_channels_override_s rc_override;
+        memset(&rc_offboard, 0, sizeof(rc_offboard));
+        rc_override.throttle = rc_offboard.throttle;
+        rc_override.pitch = rc_offboard.pitch;
+        rc_override.roll = rc_offboard.roll;
+        rc_override.yaw = rc_offboard.yaw;
+        
+        if (rc_override.throttle < -1.0f || rc_override.throttle > 1.0f) rc_override.throttle_mode  = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+        if (rc_override.pitch    < -1.0f || rc_override.pitch    > 1.0f) rc_override.pitch_mode     = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+        if (rc_override.roll     < -1.0f || rc_override.roll     > 1.0f) rc_override.roll_mode      = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+        if (rc_override.yaw      < -1.0f || rc_override.yaw      > 1.0f) rc_override.yaw_mode       = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+
+        rc_override.throttle_mode = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.roll_mode     = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.pitch_mode    = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        rc_override.yaw_mode      = rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV;
+        
+        rc_override.timestamp = hrt_absolute_time();
+        if (_rc_channels_override_pub == nullptr)
+        {
+                _rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override);
+        }
+        else
+        {
+                orb_publish(ORB_ID(rc_channels_override), _rc_channels_override_pub, &rc_override);
+        }
+//	mavlink_rc_channels_override_t rc_override;
+//	mavlink_msg_rc_channels_override_decode(msg, &rc_override);
+//
+//	struct rc_channels_override_s rc_override_;
+//	memset(&rc_override_, 0, sizeof(rc_override_));
+//	rc_override_.chan1_raw = rc_override.chan1_raw;
+//	rc_override_.chan2_raw = rc_override.chan2_raw;
+//	rc_override_.chan3_raw = rc_override.chan3_raw;
+//	rc_override_.chan4_raw = rc_override.chan4_raw;
+//	rc_override_.chan5_raw = rc_override.chan5_raw;
+//	rc_override_.chan6_raw = rc_override.chan6_raw;
+//	rc_override_.chan7_raw = rc_override.chan7_raw;
+//	rc_override_.chan8_raw = rc_override.chan8_raw;
+//	rc_override_.timestamp = hrt_absolute_time();
+//	if (_rc_channels_override_pub == nullptr)
+//	{
+//		_rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override_);
+//	}
+//	else
+//	{
+//		orb_publish(ORB_ID(rc_channels_override), _rc_channels_override_pub, &rc_override_);
+//	}
 }
+void 
+MavlinkReceiver::handle_message_rc_offboard(mavlink_message_t *msg)
+{
+    mavlink_rc_offboard_t rc_offboard;
+    mavlink_msg_rc_offboard_decode(msg, &rc_offboard);
+    
+    struct rc_channels_override_s rc_override;
+    memset(&rc_offboard, 0, sizeof(rc_offboard));
+    rc_override.throttle = rc_offboard.throttle;
+    rc_override.pitch = rc_offboard.pitch;
+    rc_override.roll = rc_offboard.roll;
+    rc_override.yaw = rc_offboard.yaw;
+    
+    if (rc_override.throttle < -1.0f || rc_override.throttle > 1.0f) rc_override.throttle_mode  = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+    if (rc_override.pitch    < -1.0f || rc_override.pitch    > 1.0f) rc_override.pitch_mode     = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+    if (rc_override.roll     < -1.0f || rc_override.roll     > 1.0f) rc_override.roll_mode      = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
+    if (rc_override.yaw      < -1.0f || rc_override.yaw      > 1.0f) rc_override.yaw_mode       = rc_channels_override_s::RC_CHANNELS_MODE_IGNORE;
 
+    rc_override.throttle_mode = rc_offboard.throttle_mode;
+    rc_override.roll_mode = rc_offboard.roll_mode;
+    rc_override.pitch_mode = rc_offboard.pitch_mode;
+    rc_override.yaw_mode = rc_offboard.yaw_mode;
+    rc_override.timestamp = hrt_absolute_time();
+    if (_rc_channels_override_pub == nullptr)
+    {
+            _rc_channels_override_pub = orb_advertise(ORB_ID(rc_channels_override), &rc_override);
+    }
+    else
+    {
+            orb_publish(ORB_ID(rc_channels_override), _rc_channels_override_pub, &rc_override);
+    }
+    
+}
+        
 void
 MavlinkReceiver::handle_message_hil_gps(mavlink_message_t *msg)
 {

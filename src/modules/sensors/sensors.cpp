@@ -2029,23 +2029,70 @@ Sensors::rc_poll()
 
 			if (overide_ok)
 			{
-                if (_rc_overide.chan2_raw >= 1000 && _rc_overide.chan2_raw<= 2000)
-				{
-					manual.x = float(_rc_overide.chan2_raw-1500)/500.0f;
-				}
-                if (_rc_overide.chan3_raw >= 1000 && _rc_overide.chan3_raw<= 2000)
-				{
-                    manual.y = float(_rc_overide.chan3_raw-1500)/500.0f;
-				}
-                if (_rc_overide.chan4_raw >= 1000 && _rc_overide.chan4_raw<= 2000)
-				{
-					manual.r = float(_rc_overide.chan4_raw-1500)/500.0f;
-				}
-                if (_rc_overide.chan1_raw >= 1000 && _rc_overide.chan1_raw<= 2000)
-                {
-                    manual.z = float(_rc_overide.chan1_raw-1500)/500.0f;
-                }
-
+                            
+                            // pitch
+                            if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV)
+                            {
+                                manual.x = _rc_overide.pitch;
+                            }
+                            else
+                            if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.x > -0.2f && manual.x < -0.2f)
+                            {
+                                manual.x = _rc_overide.pitch;
+                            }    
+                            else
+                            if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
+                            {
+                                manual.x =  manual.x + _rc_overide.pitch;
+                            }
+                            
+                            // roll
+                            if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV)
+                            {
+                                manual.y = _rc_overide.roll;
+                            }
+                            else
+                            if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.y > -0.2f && manual.y < -0.2f)
+                            {
+                                manual.y = _rc_overide.roll;
+                            }    
+                            else
+                            if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
+                            {
+                                manual.y =  manual.y + _rc_overide.roll;
+                            }
+                            
+                            // throttle
+                            if (_rc_overide.throttle_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV)
+                            {
+                                manual.z = _rc_overide.throttle;
+                            }
+                            else
+                            if (_rc_overide.throttle_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.z > 0.0f && manual.z < 0.1f)
+                            {
+                                manual.z = _rc_overide.throttle;
+                            }    
+                            else
+                            if (_rc_overide.throttle_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
+                            {
+                                manual.z =  manual.z + _rc_overide.throttle;
+                            }
+                            
+                            // yaw
+                            if (_rc_overide.yaw_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_MAV)
+                            {
+                                manual.r = _rc_overide.yaw;
+                            }
+                            else
+                            if (_rc_overide.yaw_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_RC && manual.r > -0.2f && manual.r < 0.2f)
+                            {
+                                manual.r = _rc_overide.yaw;
+                            }    
+                            else
+                            if (_rc_overide.yaw_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
+                            {
+                                manual.r =  manual.r + _rc_overide.yaw;
+                            }
 			}
 			/* mode switches */
 			manual.mode_switch = get_rc_sw3pos_position (rc_channels_s::RC_CHANNELS_FUNCTION_MODE, _parameters.rc_auto_th, _parameters.rc_auto_inv, _parameters.rc_assist_th, _parameters.rc_assist_inv);
