@@ -2044,6 +2044,9 @@ Sensors::rc_poll()
                             if (_rc_overide.pitch_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
                             {
                                 manual.x =  manual.x + _rc_overide.pitch;
+                                if (manual.x >  1.0f) manual.x =  1.0f;
+                                if (manual.x < -1.0f) manual.x = -1.0f;
+                                
                             }
                             
                             // roll
@@ -2060,6 +2063,8 @@ Sensors::rc_poll()
                             if (_rc_overide.roll_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
                             {
                                 manual.y =  manual.y + _rc_overide.roll;
+                                if (manual.y >  1.0f) manual.y =  1.0f;
+                                if (manual.y < -1.0f) manual.y = -1.0f;
                             }
                             
                             // throttle
@@ -2076,6 +2081,8 @@ Sensors::rc_poll()
                             if (_rc_overide.throttle_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
                             {
                                 manual.z =  manual.z + _rc_overide.throttle;
+                                if (manual.z >  1.0f) manual.z =  1.0f;
+                                if (manual.z <  0.0f) manual.z = -1.0f;
                             }
                             
                             // yaw
@@ -2092,6 +2099,8 @@ Sensors::rc_poll()
                             if (_rc_overide.yaw_mode == rc_channels_override_s::RC_CHANNELS_MODE_OVERRIDE_ADD_2_RC)
                             {
                                 manual.r =  manual.r + _rc_overide.yaw;
+                                if (manual.r >  1.0f) manual.r =  1.0f;
+                                if (manual.r < -1.0f) manual.r = -1.0f;
                             }
 			}
 			/* mode switches */
